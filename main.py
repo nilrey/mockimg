@@ -4,10 +4,10 @@ import glob
 import requests
 
 
-domain = '127.0.0.1:8002'
+domain = '127.0.0.1:8000'
 hostname_path = '/etc/hostname'
 input_path = '/code/input/'
-output_path = ""#"/code/output/"
+output_path = "/code/output/"
 containerId = 0
 
 
