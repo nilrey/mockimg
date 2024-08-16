@@ -4,6 +4,10 @@ WORKDIR /code
 
 COPY . /code
 
-VOLUME ["/code/buffer"]
+VOLUME ["/code/input"]
+
+VOLUME ["/code/output"]
+
+VOLUME ["/code/weights"]
 
 CMD ["python3", "/code/main.py"]
