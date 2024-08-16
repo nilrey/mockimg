@@ -4,23 +4,32 @@ import glob
 import requests
 
 
+domain = '127.0.0.1:8002'
 hostname_path = '/etc/hostname'
-output_path = "" # "/code/output/"
 input_path = '/code/input/'
-
-def getContainerId(containerId = 0):
-    with open(hostname_path, "r") as file:
-        containerId = file.read().strip()
-    return containerId
-
-containerId = getContainerId()
-url = f'http://127.0.0.1:8002/events/{containerId}/before_start'
-myobj = {"msg": "before ann start", "details": "" }
-before_start_response = requests.post(url, json = myobj)
+output_path = ""#"/code/output/"
+containerId = 0
 
 
+def getUrl():
+    return f'http://{domain}/events/{containerId}/before_start'
+
+
+def setMessage(msg = ""):
+    return {"msg": msg }
+
+
+with open(hostname_path, "r") as file:
+    containerId = file.read().strip()
+
+before_start_response = requests.post(getUrl(), json = setMessage('before ann start') )
+
+# вывод response от camino-restapi в сторонний файл, размещен на хосте в соответствующей папке output данного проекта
 with open(output_path + "before_start.txt", "w+") as f:
-    f.write('{"action": "before_start", "containerId": "' + containerId + '", "time": "' + str(dt.datetime.now()) + '", "response": ' + before_start_response.text + '}')
+    f.write('{"action": "before_start", "containerId": "' + containerId + 
+            '", "time": "' + str(dt.datetime.now()) +
+            '", "response": ' + before_start_response.text + '}')
+
 
 # filesPaths = glob.glob(input_path + '*')
 # for fpath in filesPaths :
