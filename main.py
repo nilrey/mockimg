@@ -2,21 +2,23 @@ import time
 import datetime as dt
 import glob
 import requests
+import json
 
 
-domain = '127.0.0.1:8002'
+#domain = '127.0.0.1:8002'
 domain = '172.17.0.2'
+#domain = 'camino-restapi'
 mockjson = 'mockjson.json'
 mockjson_content = '{}'
 logfile = 'processing.log'
 hostname_path = '/etc/hostname'
-input_path = '/code/input/video/'
+input_path = '/code/input/'
 output_path = '/code/output/'
 containerId = '0000000'
 
 
-def getUrl(dom='camino-restapi', cId=''):
-    return f'http://{dom}/events/{cId}/before_start'
+def getUrl(dom='camino-restapi', cId='', ep_name='before_start'):
+    return f'http://{dom}/events/{cId}/{ep_name}'
 
 
 def setMessage(msg = ""):
@@ -33,22 +35,25 @@ with open(mockjson, "r") as file:
 with open(hostname_path, "r") as file:
     containerId = file.read().strip()
 
-print("Begin")
-
 writeLog("url_compose", getUrl(domain, containerId))
 
-before_start_response = requests.post(getUrl(domain, containerId), json = setMessage('before ann start') )
+# send request to camino-restapi
+before_start_response = requests.post(getUrl(domain, containerId, 'before_start'), json = setMessage('before ann start') )
 
 writeLog("before_start", before_start_response.text)
 
-# читаем файлы из директории video
+# читаем файлы из директории input
 filesPaths = glob.glob(input_path + '*')
 for fpath in filesPaths :
     fname = fpath.replace(input_path, '').replace('.mp4', '.json')
-    with open(output_path + fname, "w+") as f:
-        f.write(mockjson_content)
-        writeLog("procceed", "filename: "+fname)
-        time.sleep(3)
-
-writeLog("before_end", "success")
-print("End")
+    if(fname):
+        with open(output_path + fname, "w+") as f:
+            f.write(mockjson_content)
+            # send request on_progress to camino-restapi
+            proceed_response = requests.post(getUrl(domain, containerId, 'on_progress'), json = setMessage(fname) )
+            writeLog("procceed", proceed_response.text )
+            time.sleep(3)
+        
+end_response = requests.post(getUrl(domain, containerId, 'before_end'), json = setMessage('before_end ') )
+writeLog("before_end", end_response.text)
+time.sleep(30)
